@@ -1,1 +1,1 @@
-# csv_parser
+Parses csv files into tables of string records in C.
