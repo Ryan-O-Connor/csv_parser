@@ -26,9 +26,10 @@ struct record* empty_record();
 struct record_table* empty_record_table();
 void add_record(struct record_table* table, struct record* r);
 void resize_table(struct record_table* table, int new_size);
-void free_table(struct record_table* table);
 void print_record_table(struct record_table* table);
 void print_record(struct record* r);
+void free_table(struct record_table* table);
+void free_record(struct record* r);
 
 
 int main(){
@@ -42,8 +43,6 @@ int main(){
   while(fgets(buffer, MAXBUFFER, fptr) != NULL){
     struct record* r = parse_fields(buffer);
     add_record(table, r);
-    //print_record(r);
-    //free(r);
   }
   //print_record(table->records[5]);
   print_record_table(table);  
@@ -62,7 +61,7 @@ struct record* parse_fields(char* buffer){
   char* field = strtok(buffer, ",\n");
   int i = 0;
   while (field != NULL){
-    r->fields[i++] = field;
+    r->fields[i++] = strdup(field);
     field = strtok(NULL, ",\n");
   }
   if (i == 0){
@@ -84,10 +83,10 @@ struct record* empty_record(){
 
 struct record_table* empty_record_table(){
   struct record_table* table = (struct record_table*) malloc(sizeof(struct record_table));
-  struct record** records = (struct record**) malloc(sizeof(struct record*));
+  struct record** records = (struct record**) malloc(50*sizeof(struct record*));
   table->records = records;
   table->num_records = 0;
-  table->array_size = 1;
+  table->array_size = 50;
   return table;
 }
 
@@ -97,7 +96,6 @@ void add_record(struct record_table* table, struct record* r){
     resize_table(table, 2*table->array_size);
   }
   table->records[table->num_records++] = r;
-  //print_record(table->records[table->num_records-1]);
 }
 
 
@@ -123,5 +121,17 @@ void print_record(struct record* r){
 }
 
 void free_table(struct record_table* table){
+  int i;
+  for (i=0; i<table->num_records; i++){
+    free_record(table->records[i]);
+  }
+  free(table);
+}
 
+void free_record(struct record* r){
+  int i;
+  for (i=0; i<r->num_fields; i++){
+    free(r->fields[i]);
+  }
+  free(r);
 }
